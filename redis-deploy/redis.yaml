@@ -1,0 +1,73 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: test-redis
+  # from the labels you can target pods/services/deployments
+  labels:
+    app: test-redis
+    role: cache
+    pool: data
+    type: redis
+spec:
+  # this replicas value
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+      labels:
+        app: test-redis
+        role: cache
+        pool: data
+        type: redis
+    spec:
+      containers:
+      - name: redis-exporter
+        image: spacedreamer/redis_exporter:0.0.1
+        command: ["./redis_exporter"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 9121
+        env:
+          - name: REDIS_ADDR
+            value: redis://127.0.0.1:6379
+          - name: REDIS_PASSWORD
+            value: foobar
+
+
+      - name: test-redis
+        image: redis:4.0.9
+        command:
+          - redis-server
+          - "--requirepass"
+          - "foobar"
+          - "--port"
+          - "6379"
+          - "--appendonly"
+          - "no"
+        resources:
+          requests:
+            cpu: 300m
+            memory: 400Mi
+        ports:
+        - containerPort: 6379
+      
+      initContainers:
+        - name: init-sysctl
+          image: busybox
+          # Updating the kernal properties
+          command:
+          - /bin/sh
+          - -c
+          - |
+            sysctl -w net.core.somaxconn=65535
+            sysctl -w net.ipv4.tcp_max_syn_backlog=65535
+          securityContext:
+            privileged: true

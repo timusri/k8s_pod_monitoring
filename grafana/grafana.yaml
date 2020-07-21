@@ -64,6 +64,10 @@ spec:
           - name: grafana-config
             mountPath: /var/lib/grafana/dashboards/pulse-dashboard.json
             subPath: pulse-dashboard.json
+          - name: grafana-config
+            mountPath: /var/lib/grafana/dashboards/redis-dashboard.json
+            subPath: redis-dashboard.json
+            
       volumes:
       - name: grafana-config
         configMap:

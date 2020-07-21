@@ -14,9 +14,7 @@ data:
     # Here it's Prometheus itself.
     scrape_configs:
       # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-      - job_name: 'prometheus'
-        static_configs:
-        - targets: ['localhost:9090']
+    
       - job_name: pulse-k8s
         scrape_interval: 10s
         scrape_timeout: 10s
@@ -47,4 +45,35 @@ data:
           separator: ;
           regex: pulse-k8s
           replacement: $1
+          action: keep
+
+      - job_name: redis
+        metrics_path: /metrics
+        scheme: http
+        kubernetes_sd_configs:
+        - role: pod
+        relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          separator: ;
+          regex: (.*)
+          target_label: k8s_namespace
+          replacement: $1
+          action: replace
+        - source_labels: [__meta_kubernetes_pod_name]
+          separator: ;
+          regex: (.*)
+          target_label: k8s_pod_name
+          replacement: $1
+          action: replace
+        - source_labels: [__address__]
+          separator: ;
+          regex: ([^:]+)(?::\d+)?
+          target_label: __address__
+          replacement: ${1}:9121
+          action: replace
+          
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          separator: ;
+          regex: test-redis
+          target_label: instance
           action: keep

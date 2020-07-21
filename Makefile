@@ -35,6 +35,11 @@ get.prometheus:
 restart.prometheus:
 	kubectl rollout restart sts prometheus-server
 
+rollout.prometheus:
+	kubectl delete -f ${BASEDIR}/prometheus/prometheus-configmap.yaml 
+	kubectl apply -f ${BASEDIR}/prometheus/prometheus-configmap.yaml
+	kubectl rollout restart sts prometheus-server
+
 
 
 destroy.prometheus:
