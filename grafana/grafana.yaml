@@ -62,9 +62,6 @@ spec:
             mountPath: /etc/grafana/provisioning/dashboards/dashboard.yaml
             subPath: dashboard.yaml
           - name: grafana-config
-            mountPath: /var/lib/grafana/dashboards/pulse-dashboard.json
-            subPath: pulse-dashboard.json
-          - name: grafana-config
             mountPath: /var/lib/grafana/dashboards/redis-dashboard.json
             subPath: redis-dashboard.json
             
